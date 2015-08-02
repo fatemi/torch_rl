@@ -4,14 +4,12 @@
 -- -------------------------------------------------------------------------------
 
 
---[[
-if not game then
-    require 'InitEnvt'
-end
---]]
+require 'utilities'
 
-require 'InitEnvt'
-game = {}
+if not game then
+    game = {}
+end
+
 
 local gw = torch.class('game.GridWorld')
 
@@ -108,6 +106,9 @@ end
 
 
 function gw:move(action)
+--[[
+This method performs a move.
+--]]
     if action == 'up' then
         local reward = self:_move_up()
         local state = deepcopy(self.board)
@@ -145,7 +146,7 @@ function gw:_move_up()
     elseif self.board[self.current_p - self.board_w] == 'H' then -- falling into a hole
         return -5.0
         
-    elseif self.board[self.current_p - self.board_w] == 'G' then -- reaching the Goal!!!
+    elseif self.board[self.current_p - self.board_w] == 'G' then -- reaching the Goal!
         self.current_p = self.current_p - self.board_w
         return 30.0
         
@@ -161,10 +162,10 @@ function gw:_move_down()
     if self.current_p > (self.board_h - 1)*self.board_w then     -- last row
         return -5.0
         
-    elseif self.board[self.current_p + self.board_w] == 'H' then -- falling into a hole
+    elseif self.board[self.current_p + self.board_w] == 'H' then
         return -5.0
         
-    elseif self.board[self.current_p + self.board_w] == 'G' then -- reaching the Goal!!!
+    elseif self.board[self.current_p + self.board_w] == 'G' then
         self.current_p = self.current_p + self.board_w
         return 30.0
         
@@ -180,10 +181,10 @@ function gw:_move_right()
     if (self.current_p % self.board_w) == 0 then                 -- last col
         return -5.0
         
-    elseif self.board[self.current_p + 1] == 'H' then            -- falling into a hole
+    elseif self.board[self.current_p + 1] == 'H' then
         return -5.0
         
-    elseif self.board[self.current_p + 1] == 'G' then            -- reaching the Goal!!!
+    elseif self.board[self.current_p + 1] == 'G' then
         self.current_p = self.current_p + 1
         return 30.0
         
@@ -199,10 +200,10 @@ function gw:_move_left()
     if (self.current_p % self.board_w) == 1 then                 -- first col
         return -5.0
         
-    elseif self.board[self.current_p - 1] == 'H' then            -- falling into a hole
+    elseif self.board[self.current_p - 1] == 'H' then
         return -5.0
         
-    elseif self.board[self.current_p - 1] == 'G' then            -- reaching the Goal!!!
+    elseif self.board[self.current_p - 1] == 'G' then
         self.current_p = self.current_p - 1
         return 30.0
         

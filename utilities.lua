@@ -40,3 +40,28 @@ function deepcopy(o, seen)
     end
     return no
 end
+
+
+function table.maxtt(t)
+--[[
+ This funcitons returns a table of keys of "t" with max value.
+ If "t" is empty, it returns an empty table.
+ 
+--]]
+    local max
+    for _, u in pairs(t) do   -- just to get an element from t and init max
+        max = u
+        for _, v in pairs(t) do
+            if v > max then max = v end
+        end
+        break
+    end
+    local indeces = {}
+    for i, v in pairs(t) do
+        if v == max then table.insert(indeces, i) end
+    end
+    return indeces
+end
+
+
+

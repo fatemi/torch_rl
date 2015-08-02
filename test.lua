@@ -3,7 +3,7 @@
 --  Created by Mehdi Fatemi on 2015-07-22.
 -- -------------------------------------------------------------------------------
 
-require 'Game'
+require 'game'
 
 
 opt = {
@@ -24,27 +24,6 @@ g:display()
 g:move('up')
 g:display()
 
-g:move('up')
-g:display()
-
-g:move('up')
-g:display()
-
-g:move('up')
-g:display()
-
-g:move('down')
-g:display()
-
-g:move('down')
-g:display()
-
-g:move('down')
-g:display()
-
-g:move('down')
-g:display()
-
 g:move('down')
 g:display()
 
@@ -54,30 +33,11 @@ g:display()
 g:move('right')
 g:display()
 
-g:move('right')
-g:display()
-g:move('right')
-g:display()
-g:move('right')
-g:display()
-
 g:move('left')
 g:display()
 
 g:move('left')
 g:display()
 
-g:move('left')
-g:display()
 
-g:move('left')
-g:display()
 
-g:move('left')
-g:display()
-
-g:move('left')
-g:display()
-
-g:move('left')
-g:display()
