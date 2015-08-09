@@ -3,7 +3,13 @@
 --  Created by Mehdi Fatemi on 2015-07-19.
 -- -------------------------------------------------------------------------------
 
-require 'utilities'
+
+--[[
+ Class rl
+ This class provides basic RL operations.
+--]]
+
+require 'utils/envt.lua'
 
 if not rl then
     rl = {}
@@ -16,12 +22,18 @@ function rlm:__init(args)
     self.numStates    = args.numStates or 0  -- current # of states
     self.maxStateSize = args.maxStateSize    -- max # of states
     self.stateDim     = args.stateDim        -- # of vars in the state
-    self.numActions   = args.numActions      -- # of actions
     
     -- set of states:
     self.S = args.s or torch.IntTensor(self.maxStateSize, self.stateDim):fill(0)
     -- set of actions:
-    self.A = args.a or torch.range(1,self.numActions):type('torch.IntTensor')
+    if args.numActions then
+        self.numActions = args.numActions    -- # of actions
+        self.A = torch.range(1,self.numActions):type('torch.IntTensor')
+    elseif args.a then
+        self.numActions = args.a:size(1)
+        self.A = args.a
+    end
+    
     -- table of action-values (should be rl.Q() object)
     self.Q = args.Q or
         rl.Q({maxStateSize = self.maxStateSize, stateDim = self.stateDim})
@@ -29,12 +41,12 @@ function rlm:__init(args)
     self.TransTable = args.TransTable or
         rl.TransTable({maxStateSize = self.maxStateSize, stateDim = self.stateDim})
     
-    self.discount = args.discount or 0.9
+    self.discount = args.discount or 0.8
     self.l_rate   = args.l_rate or 0.5
     -- policy strategy (e-greedy or softmax)
     self.strategy = args.strategy or 'e-greedy'
     if self.strategy == 'e-greedy' then
-        self.epsilon = args.epsilon or 0.1
+        self.epsilon = args.epsilon or 0.15
     end
 end
 
@@ -54,7 +66,7 @@ function rlm:QLearning(s, s_next, a, R)
     local maxQ = torch.Tensor(available_Q):max()
     local delta = R + self.discount * maxQ - self.Q:get_value(s,a)
     local v = self.Q:get_value(s,a) + self.l_rate*delta
-    self.Q:add_new(s, a, v)               -- updating Q
+    self.Q:update(s, a, v)               -- updating Q
 end
 
 
@@ -69,7 +81,7 @@ function rlm:SARSA(s, s_next, a, R)
     local a_next = self:policy(s_next)    -- next best action
     local delta = R + self.discount * self.Q:get_value(s_next, a_next) - self.Q:get_value(s,a)
     local v = self.Q:get_value(s,a) + self.l_rate*delta
-    self.Q:add_new(s, a, v)               -- updating Q
+    self.Q:update(s, a, v)               -- updating Q
 end
 
 
@@ -85,13 +97,13 @@ function rlm:policy(state)
     specified strategy.
     --]]
 
-    if self.strategy == 'epsilon' then
+    if self.strategy == 'e-greedy' then
         --[[
         Implementation of the epsilon-greedy policy.
         --]]
         -- chekcing for epsilon-greedy
         if torch.uniform() < self.epsilon then  -- exploration
-            return self.A[ torch.random(1, self.A:size()[1]) ]
+            return self.A[ torch.random(1, self.A:size(1)) ]
         else                                    -- making a greedy action
             -- table of values for "all" the available actions at the given state
             local current_Q = {}
@@ -102,10 +114,11 @@ function rlm:policy(state)
             if table.getn(current_Q) == 0 then
                 -- "state" has not been visited yet,
                 -- no policy exists, a random action will be returned
-                return self.A[ torch.random(1, self.A:size()[1]) ]
+                return self.A[ torch.random(1, self.A:size(1)) ]
             else
                 -- returning the action (or actions) with max value
                 local best_actions = table.maxtt(current_Q)
+                print('BEST ACTIONS: ', best_actions)
                 if table.getn(best_actions) == 1 then
                     return best_actions[1]
                 else
@@ -146,14 +159,7 @@ end
 
 
 
-
-
-
-
-
-
-
-
+--==============================================================================
 --[[
  Class rl.Q
  
@@ -175,13 +181,20 @@ function qf:__init(args)
 end
 
 
-function qf:add_new(s, a, value)
-    if not self:get_value(s, a) then
-        self.numQ               = self.numQ + 1
-        self.s[{self.numQ, {}}] = s
-        self.a[self.numQ]       = a
-        self.value[self.numQ]   = value
+function qf:update(s, a, value)
+    for i = 1, self.numQ do
+        if self.s[i]:eq(s):all() and self.a[i] == a then
+            self.s[{i, {}}] = s
+            self.a[i]       = a
+            self.value[i]   = value
+            return
+        end
     end
+    
+    self.numQ               = self.numQ + 1
+    self.s[{self.numQ, {}}] = s
+    self.a[self.numQ]       = a
+    self.value[self.numQ]   = value
 end
 
 
@@ -191,7 +204,18 @@ function qf:get_value(s, a)
             return self.value[i]
         end
     end
-    return nil
+    return -1  -- s, a has not been seen yet
+end
+
+
+function qf:write()
+    print('>>> \n')
+    for i = 1, self.numQ do
+        print('State:\n', tostring( self.s[i] ))
+        print('Action: ' .. tostring( self.a[i] ))
+        print('Value: ' .. tostring(self.value[i]))
+        print('---\n')
+    end
 end
 
 

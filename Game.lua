@@ -4,7 +4,7 @@
 -- -------------------------------------------------------------------------------
 
 
-require 'utilities'
+require 'utils/envt.lua'
 
 if not game then
     game = {}
@@ -44,7 +44,7 @@ function gw:set_start(row, col)
 --[[
 Setting the current position
 --]]
-    self.current_p = (row - 1) * self.board_w + col - 1
+    self.current_p = (row - 1) * self.board_w + col
 end
 
 
@@ -82,6 +82,90 @@ end
 
 
 
+function gw:s2num(state)
+    local t = torch.IntTensor(self.board_w * self.board_h):fill(0)
+    for i = 1, self.board_w * self.board_h do
+        if state[i] == 'O' then
+            t[i] = 1
+        elseif state[i] == 'H' then
+            t[i] = 2
+        elseif state[i] == 'X' then
+            t[i] = 3
+        elseif state[i] == 'G' then
+            t[i] = 4
+        end
+    end
+    return t
+end
+
+
+
+function gw:num2s(state)
+    local t = {}
+    for i = 1, self.board_w * self.board_h do
+        if state[i] == 1 then
+            table.insert(t, 'O')
+        elseif state[i] == 2 then
+            table.insert(t, 'H')
+        elseif state[i] == 3 then
+            table.insert(t, 'X')
+        elseif state[i] == 4 then
+            table.insert(t, 'G')
+        end
+    end
+    return t
+end
+
+
+
+function gw:num2a(action)
+    --[[
+     Actions are coded as follows:
+     'up'    == 1
+     'down'  == 2
+     'left'  == 3
+     'right' == 4
+     --]]
+    if action == 1 then
+        return 'up'
+    elseif action == 2 then
+        return 'down'
+    elseif action == 3 then
+        return 'left'
+    elseif action == 4 then
+        return 'right'
+    else
+        print('Action is not recognized.')
+        return nil
+    end
+end
+
+
+
+function gw:a2num(action)
+    --[[
+     Actions are coded as follows:
+     'up'    == 1
+     'down'  == 2
+     'left'  == 3
+     'right' == 4
+     --]]
+    if action == 'up' then
+        return 1
+    elseif action == 'down' then
+        return 2
+    elseif action == 'left' then
+        return 3
+    elseif action == 'right' then
+        return 4
+    else
+        print('Action is not recognized.')
+        return nil
+    end
+end
+
+
+
 function gw:display()
 --[[
 This method displayes the board
@@ -109,31 +193,32 @@ function gw:move(action)
 --[[
 This method performs a move.
 --]]
+    local reward
+    local state
     if action == 'up' then
-        local reward = self:_move_up()
-        local state = deepcopy(self.board)
+        reward = self:_move_up()
+        state = deepcopy(self.board)
         state[self.current_p] = 'X'
         
     elseif action == 'down' then
-        local reward = self:_move_down()
-        local state = deepcopy(self.board)
+        reward = self:_move_down()
+        state = deepcopy(self.board)
         state[self.current_p] = 'X'
         
     elseif action == 'left' then
-        local reward = self:_move_left()
-        local state = deepcopy(self.board)
+        reward = self:_move_left()
+        state = deepcopy(self.board)
         state[self.current_p] = 'X'
         
     elseif action == 'right' then
-        local reward = self:_move_right()
-        local state = deepcopy(self.board)
+        reward = self:_move_right()
+        state = deepcopy(self.board)
         state[self.current_p] = 'X'
         
     else
         print('Action is not recognized.')
     
     end
-        
     return state, reward
 end
 
