@@ -1,23 +1,17 @@
--- -------------------------------------------------------------------------------
---  InitEnvt.lua -
---  Created by Mehdi Fatemi on 2015-07-21.
--- -------------------------------------------------------------------------------
+--[[ ---------------------------------------------------------------------------
+--  envt.lua -
+--  Created by Mehdi Fatemi on 2015-07-19.
+
+Copyright (c) 2015 Mehdi Fatemi.
+
+-- -----------------------------------------------------------------------------
+--]]
+
 
 -- rl = {}
 -- game = {}
 
 require 'torch'
-require 'nn'
-require 'nngraph'
--- require 'nnutils'
-require 'image'
--- require 'TransitionTable'
--- require 'Rectifier'
-
-
-
-
-
 
 
 --- Utility functions
